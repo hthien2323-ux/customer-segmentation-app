@@ -130,13 +130,35 @@ if uploaded_file is not None:
 
   df = load_data(uploaded_file)
 
-  # --- XỬ LÝ DỮ LIỆU & CHỈ SỐ RFM (GIỮ NGUYÊN TÊN CỘT TIẾNG ANH GỐC) ---
-  if "CustomerID" in df.columns:
-    df = df.dropna(subset=["CustomerID"])
-  else:
-    st.error("File dữ liệu không tìm thấy cột CustomerID!")
+  # --- TỰ ĐỘNG CHUẨN HÓA TÊN CỘT ĐỂ KHÔNG BAO GIỜ BỊ LỖI KEYERROR ---
+  rename_dict = {}
+  for col in df.columns:
+    c_lower = col.lower().replace(" ", "").replace("_", "")
+    if "customer" in c_lower:
+      rename_dict[col] = "CustomerID"
+    elif "invoicedate" in c_lower or "date" in c_lower:
+      rename_dict[col] = "InvoiceDate"
+    elif "invoiceno" in c_lower or "invoice" in c_lower:
+      rename_dict[col] = "InvoiceNo"
+    elif "quantity" in c_lower:
+      rename_dict[col] = "Quantity"
+    elif "unitprice" in c_lower or "price" in c_lower:
+      rename_dict[col] = "UnitPrice"
+
+  df = df.rename(columns=rename_dict)
+
+  # Kiểm tra xem đã đủ các cột cốt lõi chưa
+  required_cols = ["CustomerID", "InvoiceDate", "InvoiceNo", "Quantity", "UnitPrice"]
+  missing = [c for c in required_cols if c not in df.columns]
+  if missing:
+    st.error(
+        f"File CSV thiếu các cột bắt buộc: {missing}. Các cột hiện có trong file"
+        f" là: {list(df.columns)}"
+    )
     st.stop()
 
+  # --- XỬ LÝ DỮ LIỆU & CHỈ SỐ RFM ---
+  df = df.dropna(subset=["CustomerID"])
   df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
   df["TotalSum"] = df["Quantity"] * df["UnitPrice"]
 
