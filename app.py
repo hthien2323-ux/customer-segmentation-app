@@ -7,7 +7,7 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="Hệ Thống Phân Tích Doanh Thu & Phân Khúc Khách Hàng",
+    page_title="Phân Tích Doanh Thu & Khách Hàng",
     page_icon=None,
     layout="wide",
 )
@@ -22,15 +22,14 @@ st.markdown(
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .main-title {
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 800;
         color: #00e5ff;
         text-align: center;
-        letter-spacing: 0.5px;
         margin-bottom: 2px;
     }
     .sub-title {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
         color: #94a3b8;
         text-align: center;
@@ -38,7 +37,7 @@ st.markdown(
     }
     h3 {
         color: #00e5ff !important;
-        font-size: 20px !important;
+        font-size: 18px !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #1e293b;
         padding-bottom: 6px;
@@ -53,7 +52,7 @@ st.markdown(
         background-color: #1e293b;
         border-radius: 6px;
         color: #e2e8f0;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
         padding: 8px 18px;
         border: 1px solid #334155;
@@ -90,17 +89,17 @@ st.markdown(
 
 # --- TIÊU ĐỀ TRANG ---
 st.markdown(
-    '<p class="main-title">HỆ THỐNG PHÂN TÍCH DOANH THU & PHÂN KHÚC KHÁCH HÀNG</p>',
+    '<p class="main-title">HỆ THỐNG PHÂN TÍCH DOANH THU & KHÁCH HÀNG</p>',
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Bảng điều khiển quản trị chiến lược dựa trên hành vi mua sắm thực tế</p>',
+    '<p class="sub-title">Bảng điều khiển kinh doanh tổng hợp</p>',
     unsafe_allow_html=True,
 )
 
 # --- THANH BÊN (SIDEBAR) ---
 st.sidebar.markdown(
-    "<h3 style='font-size:18px !important; border:none;'>Cấu hình hệ thống</h3>",
+    "<h3 style='font-size:16px !important; border:none;'>Cấu hình hệ thống</h3>",
     unsafe_allow_html=True,
 )
 uploaded_file = st.sidebar.file_uploader(
@@ -108,11 +107,11 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 st.sidebar.markdown(
-    "<h3 style='font-size:16px !important; border:none; margin-top:15px"
-    " !important;'>Bộ lọc chiến lược</h3>",
+    "<h3 style='font-size:15px !important; border:none; margin-top:15px"
+    " !important;'>Bộ lọc kinh doanh</h3>",
     unsafe_allow_html=True,
 )
-n_clusters_input = st.sidebar.slider("Số lượng phân khúc khách hàng", 2, 8, 3)
+n_clusters_input = st.sidebar.slider("Số lượng nhóm khách hàng", 2, 8, 3)
 
 if uploaded_file is not None:
   @st.cache_data
@@ -163,7 +162,7 @@ if uploaded_file is not None:
   rfm.columns = ["CustomerID", "Recency", "Frequency", "Monetary"]
   rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
 
-  # --- CHẠY 3 THUẬT TOÁN ĐỂ TỔNG HỢP ---
+  # --- CHẠY 3 THUẬT TOÁN ---
   scaler = StandardScaler()
   rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
@@ -177,39 +176,39 @@ if uploaded_file is not None:
       rfm_scaled
   )
 
-  # --- CÁC CHỈ SỐ TỔNG QUAN DOANH THU (EXECUTIVE METRICS) ---
+  # --- CHỈ SỐ TỔNG QUAN ---
   total_revenue = rfm["Monetary"].sum()
   total_customers = len(rfm)
 
   col1, col2, col3, col4 = st.columns(4)
   with col1:
-    st.metric("Tổng doanh thu hệ thống ($)", f"${total_revenue:,.0f}")
+    st.metric("Tổng doanh thu ($)", f"${total_revenue:,.0f}")
   with col2:
-    st.metric("Tổng khách hàng phân tích (Khách)", f"{total_customers:,}")
+    st.metric("Tổng khách hàng", f"{total_customers:,}")
   with col3:
-    st.metric("Doanh thu TB / Khách hàng ($/KH)", f"${total_revenue/total_customers:,.2f}")
+    st.metric("Doanh thu TB / Khách", f"${total_revenue/total_customers:,.2f}")
   with col4:
-    st.metric("Công nghệ phân tích", "Hệ thống Đa thuật toán AI")
+    st.metric("Công nghệ phân tích", "Hệ thống Kết hợp AI")
 
   st.markdown("<br>", unsafe_allow_html=True)
 
   # --- CÁC TAB QUẢN TRỊ ---
   tab1, tab2, tab3 = st.tabs([
-      "Tổng quan Doanh thu & Phân khúc",
-      "Hiệu suất & Đóng góp Doanh thu từng Nhóm",
-      "Dữ liệu khách hàng chi tiết",
+      "Tổng quan Doanh thu",
+      "Hiệu suất Từng Nhóm",
+      "Danh sách Khách hàng",
   ])
 
   with tab1:
-    st.markdown("<h3>GÓC NHÌN ĐA CHIỀU VỀ HÀNH VI KHÁCH HÀNG</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>GÓC NHÌN ĐA CHIỀU KHÁCH HÀNG</h3>", unsafe_allow_html=True)
 
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
       st.markdown(
           "<p"
-          " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>1. Phân nhóm theo giá trị tiêu dùng</p>",
+          " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
+          " 0 0 5px 0;'>1. Phân nhóm khách mua</p>",
           unsafe_allow_html=True,
       )
       fig_km = px.scatter(
@@ -231,8 +230,8 @@ if uploaded_file is not None:
     with col_b:
       st.markdown(
           "<p"
-          " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>2. Phân tầng cấu trúc hành vi</p>",
+          " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
+          " 0 0 5px 0;'>2. Phân loại theo cấp</p>",
           unsafe_allow_html=True,
       )
       fig_hi = px.scatter(
@@ -254,8 +253,8 @@ if uploaded_file is not None:
     with col_c:
       st.markdown(
           "<p"
-          " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>3. Phát hiện khách hàng VIP đột phá</p>",
+          " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
+          " 0 0 5px 0;'>3. Lọc khách hàng VIP</p>",
           unsafe_allow_html=True,
       )
       fig_db = px.scatter(
@@ -275,7 +274,7 @@ if uploaded_file is not None:
       st.plotly_chart(fig_db, use_container_width=True)
 
   with tab2:
-    st.markdown("<h3>BÁO CÁO ĐÓNG GÓP DOANH THU & CHIẾN LƯỢC THEO NHÓM</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>BÁO CÁO ĐÓNG GÓP DOANH THU</h3>", unsafe_allow_html=True)
     
     revenue_summary = (
         rfm.groupby("Cluster_KMeans")
@@ -295,7 +294,7 @@ if uploaded_file is not None:
 
     revenue_summary = revenue_summary.rename(
         columns={
-            "Cluster_KMeans": "Nhóm Phân Khúc",
+            "Cluster_KMeans": "Nhóm Khách Hàng",
             "Customer_Count": "Số lượng KH (Người)",
             "Total_Revenue": "Tổng doanh thu ($)",
             "Revenue_Share(%)": "Tỷ trọng đóng góp (%)",
@@ -319,10 +318,10 @@ if uploaded_file is not None:
 
     fig_rev = px.bar(
         revenue_summary,
-        x="Nhóm Phân Khúc",
+        x="Nhóm Khách Hàng",
         y="Tổng doanh thu ($)",
         text="Tỷ trọng đóng góp (%)",
-        title="Biểu đồ phân bổ tỷ trọng doanh thu theo phân khúc khách hàng",
+        title="Biểu đồ phân bổ doanh thu theo nhóm khách hàng",
         template="plotly_dark",
     )
     fig_rev.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
@@ -333,15 +332,15 @@ if uploaded_file is not None:
     st.plotly_chart(fig_rev, use_container_width=True)
 
   with tab3:
-    st.markdown("<h3>CHI TIẾT DỮ LIỆU TÀI CHÍNH & KHÁCH HÀNG ĐÃ PHÂN KHÚC</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>CHI TIẾT KHÁCH HÀNG THEO DỮ LIỆU</h3>", unsafe_allow_html=True)
     st.dataframe(rfm, use_container_width=True)
 
 else:
   st.markdown(
       """
       <div style="text-align: center; padding: 50px; background-color: #111827; border-radius: 8px; border: 1px dashed #374151; margin-top: 40px;">
-          <h3 style="color: #00e5ff; border: none; margin-bottom: 10px;">CHƯA CÓ DỮ LIỆU KINH DOANH ĐƯỢC TẢI LÊN</h3>
-          <p style="font-size: 15px; color: #9ca3af;">Vui lòng tải tệp dữ liệu <b>Online_Retail.csv</b> ở thanh điều hướng bên trái để kích hoạt hệ thống phân tích doanh thu.</p>
+          <h3 style="color: #00e5ff; border: none; margin-bottom: 10px;">CHƯA CÓ DỮ LIỆU ĐƯỢC TẢI LÊN</h3>
+          <p style="font-size: 15px; color: #9ca3af;">Vui lòng tải tệp <b>Online_Retail.csv</b> ở thanh bên trái để khởi chạy hệ thống.</p>
       </div>
       """,
       unsafe_allow_html=True,
