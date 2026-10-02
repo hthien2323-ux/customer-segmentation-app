@@ -125,17 +125,16 @@ if uploaded_file is not None:
   @st.cache_data
   def load_data(file):
     data = pd.read_csv(file, encoding="ISO-8859-1")
-    # Làm sạch tên cột: loại bỏ khoảng trắng thừa ở đầu/cuối tên cột
     data.columns = data.columns.str.strip()
     return data
 
   df = load_data(uploaded_file)
 
-  # --- XỬ LÝ DỮ LIỆU & RFM ---
+  # --- XỬ LÝ DỮ LIỆU & CHỈ SỐ RFM (GIỮ NGUYÊN TÊN CỘT TIẾNG ANH GỐC) ---
   if "CustomerID" in df.columns:
     df = df.dropna(subset=["CustomerID"])
   else:
-    st.error("Không tìm thấy cột CustomerID trong file dữ liệu!")
+    st.error("File dữ liệu không tìm thấy cột CustomerID!")
     st.stop()
 
   df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
@@ -205,7 +204,7 @@ if uploaded_file is not None:
 
   st.markdown("<br>", unsafe_allow_html=True)
 
-  # --- CÁC TAB NỘI DUNG (MÀU SẮC RÕ RÀNG, CHỮ TO) ---
+  # --- CÁC TAB NỘI DUNG (HOÀN TOÀN BẰNG TIẾNG VIỆT) ---
   tab1, tab2, tab3 = st.tabs(
       ["Trực quan hóa và Phân tích", "Thống kê chi tiết cụm", "Dữ liệu khách hàng"]
   )
@@ -283,19 +282,19 @@ if uploaded_file is not None:
 
     cluster_summary = cluster_summary.rename(
         columns={
-            "Recency": "Recency TB (Ngày)",
-            "Frequency": "Frequency TB (Lần)",
-            "Monetary": "Monetary TB ($)",
-            "Customer_Count": "Số lượng KH",
+            "Recency": "Thời gian mua gần nhất TB (Ngày)",
+            "Frequency": "Tần suất mua TB (Lần)",
+            "Monetary": "Tổng chi tiêu TB ($)",
+            "Customer_Count": "Số lượng khách hàng",
         }
     )
 
     st.dataframe(
         cluster_summary.style.format({
-            "Recency TB (Ngày)": "{:.1f}",
-            "Frequency TB (Lần)": "{:.1f}",
-            "Monetary TB ($)": "{:,.2f}",
-            "Số lượng KH": "{:,}",
+            "Thời gian mua gần nhất TB (Ngày)": "{:.1f}",
+            "Tần suất mua TB (Lần)": "{:.1f}",
+            "Tổng chi tiêu TB ($)": "{:,.2f}",
+            "Số lượng khách hàng": "{:,}",
         }),
         use_container_width=True,
     )
