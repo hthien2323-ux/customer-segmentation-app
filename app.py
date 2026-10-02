@@ -7,12 +7,12 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="Hệ Thống Phân Khúc & Phân Tích Doanh Thu Khách Hàng",
+    page_title="Hệ Thống Phân Tích Doanh Thu & Phân Khúc Khách Hàng",
     page_icon=None,
     layout="wide",
 )
 
-# --- TÙY CHỈNH CSS (ĐẲNG CẤP DOANH NGHIỆP) ---
+# --- TÙY CHỈNH CSS ---
 st.markdown(
     """
     <style>
@@ -94,7 +94,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Bảng điều khiển quản trị chiến lược tích hợp thuật toán đa chiều (K-Means, Hierarchical, DBSCAN)</p>',
+    '<p class="sub-title">Bảng điều khiển quản trị chiến lược dựa trên hành vi mua sắm thực tế</p>',
     unsafe_allow_html=True,
 )
 
@@ -180,17 +180,16 @@ if uploaded_file is not None:
   # --- CÁC CHỈ SỐ TỔNG QUAN DOANH THU (EXECUTIVE METRICS) ---
   total_revenue = rfm["Monetary"].sum()
   total_customers = len(rfm)
-  avg_order_value = total_revenue / rfm["Frequency"].sum()
 
   col1, col2, col3, col4 = st.columns(4)
   with col1:
-    st.metric("Tổng doanh thu hệ thống", f"${total_revenue:,.0f}")
+    st.metric("Tổng doanh thu hệ thống ($)", f"${total_revenue:,.0f}")
   with col2:
-    st.metric("Tổng khách hàng phân tích", f"{total_customers:,}")
+    st.metric("Tổng khách hàng phân tích (Khách)", f"{total_customers:,}")
   with col3:
-    st.metric("Giá trị vòng đời TB / KH", f"${total_revenue/total_customers:,.2f}")
+    st.metric("Doanh thu TB / Khách hàng ($/KH)", f"${total_revenue/total_customers:,.2f}")
   with col4:
-    st.metric("Mô hình hợp nhất", "3 Thuật toán (AI Core)")
+    st.metric("Công nghệ phân tích", "Hệ thống Đa thuật toán AI")
 
   st.markdown("<br>", unsafe_allow_html=True)
 
@@ -202,7 +201,7 @@ if uploaded_file is not None:
   ])
 
   with tab1:
-    st.markdown("<h3>BIỂU ĐỒ PHÂN TÍCH ĐA MÔ HÌNH HÀNH VI KHÁCH HÀNG</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>GÓC NHÌN ĐA CHIỀU VỀ HÀNH VI KHÁCH HÀNG</h3>", unsafe_allow_html=True)
 
     col_a, col_b, col_c = st.columns(3)
 
@@ -210,7 +209,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>1. K-Means (Tối ưu biên độ giá trị)</p>",
+          " 0 0 5px 0;'>1. Phân nhóm theo giá trị tiêu dùng</p>",
           unsafe_allow_html=True,
       )
       fig_km = px.scatter(
@@ -233,7 +232,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>2. Hierarchical (Cấu trúc phân tầng)</p>",
+          " 0 0 5px 0;'>2. Phân tầng cấu trúc hành vi</p>",
           unsafe_allow_html=True,
       )
       fig_hi = px.scatter(
@@ -256,7 +255,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 15px; margin:"
-          " 0 0 5px 0;'>3. DBSCAN (Cô lập khách hàng VIP dị biệt)</p>",
+          " 0 0 5px 0;'>3. Phát hiện khách hàng VIP đột phá</p>",
           unsafe_allow_html=True,
       )
       fig_db = px.scatter(
@@ -278,7 +277,6 @@ if uploaded_file is not None:
   with tab2:
     st.markdown("<h3>BÁO CÁO ĐÓNG GÓP DOANH THU & CHIẾN LƯỢC THEO NHÓM</h3>", unsafe_allow_html=True)
     
-    # Tổng hợp số liệu theo K-Means làm chuẩn tài chính
     revenue_summary = (
         rfm.groupby("Cluster_KMeans")
         .agg(
@@ -298,11 +296,11 @@ if uploaded_file is not None:
     revenue_summary = revenue_summary.rename(
         columns={
             "Cluster_KMeans": "Nhóm Phân Khúc",
-            "Customer_Count": "Số lượng KH",
+            "Customer_Count": "Số lượng KH (Người)",
             "Total_Revenue": "Tổng doanh thu ($)",
-            "Revenue_Share(%)": "Tỷ trọng doanh thu (%)",
-            "Avg_Recency": "Số ngày mua gần nhất (TB)",
-            "Avg_Frequency": "Tần suất mua (TB)",
+            "Revenue_Share(%)": "Tỷ trọng đóng góp (%)",
+            "Avg_Recency": "Số ngày mua gần nhất TB (Ngày)",
+            "Avg_Frequency": "Tần suất mua TB (Lần)",
             "Avg_Monetary": "Chi tiêu TB / KH ($)",
         }
     )
@@ -310,22 +308,21 @@ if uploaded_file is not None:
     st.dataframe(
         revenue_summary.style.format({
             "Tổng doanh thu ($)": "{:,.2f}",
-            "Tỷ trọng doanh thu (%)": "{:.2f}%",
-            "Số ngày mua gần nhất (TB)": "{:.1f}",
-            "Tần suất mua (TB)": "{:.1f}",
+            "Tỷ trọng đóng góp (%)": "{:.2f}%",
+            "Số ngày mua gần nhất TB (Ngày)": "{:.1f}",
+            "Tần suất mua TB (Lần)": "{:.1f}",
             "Chi tiêu TB / KH ($)": "{:,.2f}",
-            "Số lượng KH": "{:,}",
+            "Số lượng KH (Người)": "{:,}",
         }),
         use_container_width=True,
     )
 
-    # Biểu đồ trực quan tỷ trọng doanh thu đóng góp
     fig_rev = px.bar(
         revenue_summary,
         x="Nhóm Phân Khúc",
         y="Tổng doanh thu ($)",
-        text="Tỷ trọng doanh thu (%)",
-        title="Biểu đồ phân bổ nguồn lực doanh thu theo phân khúc khách hàng",
+        text="Tỷ trọng đóng góp (%)",
+        title="Biểu đồ phân bổ tỷ trọng doanh thu theo phân khúc khách hàng",
         template="plotly_dark",
     )
     fig_rev.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
