@@ -7,7 +7,7 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="So Sánh 3 Thuật Toán Phân Khúc KH", page_icon=None, layout="wide"
+    page_title="Hệ Thống Phân Khúc KH - Đa Thuật Toán", page_icon=None, layout="wide"
 )
 
 # --- TÙY CHỈNH CSS ---
@@ -20,7 +20,7 @@ st.markdown(
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .main-title {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: 800;
         color: #00e5ff;
         text-align: center;
@@ -28,7 +28,7 @@ st.markdown(
         margin-bottom: 5px;
     }
     .sub-title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         color: #93c5fd;
         text-align: center;
@@ -36,7 +36,7 @@ st.markdown(
     }
     h3 {
         color: #00e5ff !important;
-        font-size: 22px !important;
+        font-size: 21px !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #1e293b;
         padding-bottom: 6px;
@@ -65,11 +65,21 @@ st.markdown(
         background-color: #111827;
         border-left: 4px solid #00e5ff;
         padding: 12px;
-        border-radius: 4px;
+        border-radius: 6px;
         margin: 12px 0;
-        font-size: 15px;
+        font-size: 14px;
         color: #e5e7eb;
         line-height: 1.5;
+    }
+    .algo-desc {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #cbd5e1;
+        margin-bottom: 10px;
+        min-height: 75px;
     }
     .note-title {
         font-weight: 700;
@@ -101,11 +111,11 @@ st.markdown(
 
 # --- TIÊU ĐỀ TRANG ---
 st.markdown(
-    '<p class="main-title">HỆ THỐNG SO SÁNH 3 THUẬT TOÁN PHÂN KHÚC KHÁCH HÀNG</p>',
+    '<p class="main-title">HỆ THỐNG PHÂN KHÚC KHÁCH HÀNG TÍCH HỢP 3 THUẬT TOÁN</p>',
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Phân tích hành vi RFM tích hợp đồng thời K-Means, Hierarchical và DBSCAN</p>',
+    '<p class="sub-title">Kết hợp đồng thời K-Means, Hierarchical và DBSCAN nhằm tối ưu hóa nhận diện hành vi khách hàng qua mô hình RFM</p>',
     unsafe_allow_html=True,
 )
 
@@ -118,14 +128,13 @@ uploaded_file = st.sidebar.file_uploader(
     "Tải lên file Online_Retail.csv", type=["csv"]
 )
 
-# Thêm thanh trượt (slider) để kéo phân chia số lượng cụm ngay trên giao diện
 st.sidebar.markdown(
     "<h3 style='font-size:16px !important; border:none; margin-top:15px"
-    " !important;'>Điều chỉnh phân cụm</h3>",
+    " !important;'>Tham số phân cụm</h3>",
     unsafe_allow_html=True,
 )
 n_clusters_input = st.sidebar.slider(
-    "Số lượng cụm (cho K-Means & Hierarchical)", 2, 8, 3
+    "Số lượng cụm mục tiêu (K-Means & Hierarchical)", 2, 8, 3
 )
 
 if uploaded_file is not None:
@@ -177,7 +186,7 @@ if uploaded_file is not None:
   rfm.columns = ["CustomerID", "Recency", "Frequency", "Monetary"]
   rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
 
-  # --- CHẠY ĐỒNG THỜI CẢ 3 THUẬT TOÁN THEO SỐ CỤM TRÊN SLIDER ---
+  # --- CHẠY 3 THUẬT TOÁN ---
   scaler = StandardScaler()
   rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
@@ -204,24 +213,24 @@ if uploaded_file is not None:
   with col3:
     st.metric("Tần suất mua TB", f"{rfm['Frequency'].mean():.1f} lần")
   with col4:
-    st.metric("Số thuật toán tích hợp", "3 Thuật toán")
+    st.metric("Kiến trúc hệ thống", "Đa mô hình (3 trong 1)")
 
   st.markdown("<br>", unsafe_allow_html=True)
 
   # --- CÁC TAB NỘI DUNG ---
   tab1, tab2, tab3 = st.tabs([
-      "Trực quan hóa 3 Thuật toán",
+      "Trực quan hóa Đa Thuật Toán",
       "Thống kê chi tiết các cụm",
       "Dữ liệu khách hàng tổng hợp",
   ])
 
   with tab1:
-    st.markdown("<h3>SO SÁNH BIỂU ĐỒ PHÂN TÁN CỦA 3 THUẬT TOÁN</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>GÓC NHÌN ĐẶC TRƯNG CỦA 3 THUẬT TOÁN</h3>", unsafe_allow_html=True)
     st.markdown(
         """
         <div class="note-box">
-            <div class="note-title">Tổng quan song song</div>
-            Dưới đây là kết quả phân khúc đồng thời từ 3 mô hình học máy. Bạn có thể thay đổi thanh trượt bên menu trái để xem sự thay đổi phân chia cụm theo thời gian thực!
+            <div class="note-title">Triết lý thiết kế hệ thống kết hợp</div>
+            Hệ thống không phụ thuộc vào duy nhất một mô hình mà kết hợp đồng thời 3 cơ chế học máy khác nhau để bổ khuyết điểm yếu cho nhau: <b>Tối ưu tâm cụm (K-Means)</b>, <b>Phân cấp cấu trúc (Hierarchical)</b> và <b>Phát hiện mật độ & Nhiễu (DBSCAN)</b>. Bạn có thể kéo thanh trượt ở thanh bên trái để thay đổi số lượng cụm và quan sát phản ứng của các mô hình theo thời gian thực!
         </div>
         """,
         unsafe_allow_html=True,
@@ -230,11 +239,18 @@ if uploaded_file is not None:
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
-      # Tiêu đề màu vàng bằng HTML
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 16px; margin:"
           " 0;'>1. K-Means Clustering</p>",
+          unsafe_allow_html=True,
+      )
+      st.markdown(
+          """
+            <div class="algo-desc">
+                <b>Đặc trưng:</b> Dựa trên tâm cụm (Centroids). Tốc độ cực nhanh, phân chia ranh giới rõ ràng dựa vào khoảng cách tối ưu.
+            </div>
+            """,
           unsafe_allow_html=True,
       )
       fig_km = px.scatter(
@@ -260,6 +276,14 @@ if uploaded_file is not None:
           " 0;'>2. Hierarchical Clustering</p>",
           unsafe_allow_html=True,
       )
+      st.markdown(
+          """
+            <div class="algo-desc">
+                <b>Đặc trưng:</b> Phân cấp cấu trúc (Bottom-up). Xây dựng phả hệ nhóm khách hàng dựa trên độ tương đồng gần gũi.
+            </div>
+            """,
+          unsafe_allow_html=True,
+      )
       fig_hi = px.scatter(
           rfm,
           x="Recency",
@@ -281,6 +305,14 @@ if uploaded_file is not None:
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 16px; margin:"
           " 0;'>3. DBSCAN Clustering</p>",
+          unsafe_allow_html=True,
+      )
+      st.markdown(
+          """
+            <div class="algo-desc">
+                <b>Đặc trưng:</b> Dựa trên mật độ không gian. Tự động nhận diện và cô lập các điểm nhiễu (khách hàng VIP bất thường).
+            </div>
+            """,
           unsafe_allow_html=True,
       )
       fig_db = px.scatter(
@@ -311,17 +343,25 @@ if uploaded_file is not None:
     )
     cluster_summary = cluster_summary.rename(
         columns={
-            "Cluster_KMeans": "Cụm",
+            "Cluster_KMeans": "Nhóm Cụm",
             "Recency": "Thời gian mua gần nhất TB (Ngày)",
             "Frequency": "Tần suất mua TB (Lần)",
             "Monetary": "Tổng chi tiêu TB ($)",
-            "Customer_Count": "Số lượng khách hàng",
+            "Customer_Count": "Quy mô khách hàng",
         }
     )
-    st.dataframe(cluster_summary, use_container_width=True)
+    st.dataframe(
+        cluster_summary.style.format({
+            "Thời gian mua gần nhất TB (Ngày)": "{:.1f}",
+            "Tần suất mua TB (Lần)": "{:.1f}",
+            "Tổng chi tiêu TB ($)": "{:,.2f}",
+            "Quy mô khách hàng": "{:,}",
+        }),
+        use_container_width=True,
+    )
 
   with tab3:
-    st.markdown("<h3>DANH SÁCH DỮ LIỆU RFM & KẾT QUẢ GOM CỤM</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>DANH SÁCH CHI TIẾT DỮ LIỆU & KẾT QUẢ ĐA MÔ HÌNH</h3>", unsafe_allow_html=True)
     st.dataframe(rfm, use_container_width=True)
 
 else:
@@ -329,7 +369,7 @@ else:
       """
       <div style="text-align: center; padding: 40px; background-color: #111827; border-radius: 8px; border: 1px dashed #374151; margin-top: 40px;">
           <h3 style="color: #00e5ff; border: none; margin-bottom: 10px;">CHƯA CÓ DỮ LIỆU TẢI LÊN</h3>
-          <p style="font-size: 15px; color: #9ca3af;">Hãy tải file <b>Online_Retail.csv</b> lên ở thanh menu bên trái để hệ thống tự động chạy đồng thời cả 3 thuật toán.</p>
+          <p style="font-size: 15px; color: #9ca3af;">Hãy tải file <b>Online_Retail.csv</b> lên ở thanh menu bên trái để khởi chạy hệ thống tích hợp đa thuật toán.</p>
       </div>
       """,
       unsafe_allow_html=True,
