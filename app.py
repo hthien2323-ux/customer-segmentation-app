@@ -124,12 +124,20 @@ uploaded_file = st.sidebar.file_uploader(
 if uploaded_file is not None:
   @st.cache_data
   def load_data(file):
-    return pd.read_csv(file, encoding="ISO-8859-1")
+    data = pd.read_csv(file, encoding="ISO-8859-1")
+    # Làm sạch tên cột: loại bỏ khoảng trắng thừa ở đầu/cuối tên cột
+    data.columns = data.columns.str.strip()
+    return data
 
   df = load_data(uploaded_file)
 
   # --- XỬ LÝ DỮ LIỆU & RFM ---
-  df = df.dropna(subset=["CustomerID"])
+  if "CustomerID" in df.columns:
+    df = df.dropna(subset=["CustomerID"])
+  else:
+    st.error("Không tìm thấy cột CustomerID trong file dữ liệu!")
+    st.stop()
+
   df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
   df["TotalSum"] = df["Quantity"] * df["UnitPrice"]
 
