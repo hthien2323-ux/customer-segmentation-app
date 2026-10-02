@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="So Sánh 3 Thuật Toán Phân Khúc KH", page_icon=None, layout="wide"
 )
 
-# --- TÙY CHỈNH CSS (MÀU HỒNG NEON CHO TỔNG KHÁCH HÀNG) ---
+# --- TÙY CHỈNH CSS ---
 st.markdown(
     """
     <style>
@@ -118,6 +118,16 @@ uploaded_file = st.sidebar.file_uploader(
     "Tải lên file Online_Retail.csv", type=["csv"]
 )
 
+# Thêm thanh trượt (slider) để kéo phân chia số lượng cụm ngay trên giao diện
+st.sidebar.markdown(
+    "<h3 style='font-size:16px !important; border:none; margin-top:15px"
+    " !important;'>Điều chỉnh phân cụm</h3>",
+    unsafe_allow_html=True,
+)
+n_clusters_input = st.sidebar.slider(
+    "Số lượng cụm (cho K-Means & Hierarchical)", 2, 8, 3
+)
+
 if uploaded_file is not None:
   @st.cache_data
   def load_data(file):
@@ -167,16 +177,18 @@ if uploaded_file is not None:
   rfm.columns = ["CustomerID", "Recency", "Frequency", "Monetary"]
   rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
 
-  # --- CHẠY ĐỒNG THỜI CẢ 3 THUẬT TOÁN ---
+  # --- CHẠY ĐỒNG THỜI CẢ 3 THUẬT TOÁN THEO SỐ CỤM TRÊN SLIDER ---
   scaler = StandardScaler()
   rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
-  # 1. K-Means (Mặc định 3 cụm)
-  kmeans_model = KMeans(n_clusters=3, random_state=42, n_init=10)
+  # 1. K-Means
+  kmeans_model = KMeans(
+      n_clusters=n_clusters_input, random_state=42, n_init=10
+  )
   rfm["Cluster_KMeans"] = kmeans_model.fit_predict(rfm_scaled)
 
-  # 2. Hierarchical (Mặc định 3 cụm)
-  hier_model = AgglomerativeClustering(n_clusters=3)
+  # 2. Hierarchical
+  hier_model = AgglomerativeClustering(n_clusters=n_clusters_input)
   rfm["Cluster_Hierarchical"] = hier_model.fit_predict(rfm_scaled)
 
   # 3. DBSCAN
@@ -209,22 +221,27 @@ if uploaded_file is not None:
         """
         <div class="note-box">
             <div class="note-title">Tổng quan song song</div>
-            Dưới đây là kết quả phân khúc đồng thời từ 3 mô hình học máy: <b>K-Means</b>, <b>Hierarchical Clustering</b> và <b>DBSCAN</b> giúp hội đồng dễ dàng so sánh độ hiệu quả trực quan.
+            Dưới đây là kết quả phân khúc đồng thời từ 3 mô hình học máy. Bạn có thể thay đổi thanh trượt bên menu trái để xem sự thay đổi phân chia cụm theo thời gian thực!
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Hiển thị 3 biểu đồ nằm trên 3 cột riêng biệt hoặc xếp dọc rõ ràng
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
+      # Tiêu đề màu vàng bằng HTML
+      st.markdown(
+          "<p"
+          " style='color: #fbbf24; font-weight: 700; font-size: 16px; margin:"
+          " 0;'>1. K-Means Clustering</p>",
+          unsafe_allow_html=True,
+      )
       fig_km = px.scatter(
           rfm,
           x="Recency",
           y="Monetary",
           color=rfm["Cluster_KMeans"].astype(str),
-          title="1. K-Means Clustering",
           template="plotly_dark",
       )
       fig_km.update_layout(
@@ -232,16 +249,22 @@ if uploaded_file is not None:
           paper_bgcolor="#0b0f19",
           font=dict(size=10),
           showlegend=False,
+          margin=dict(l=10, r=10, t=10, b=10),
       )
       st.plotly_chart(fig_km, use_container_width=True)
 
     with col_b:
+      st.markdown(
+          "<p"
+          " style='color: #fbbf24; font-weight: 700; font-size: 16px; margin:"
+          " 0;'>2. Hierarchical Clustering</p>",
+          unsafe_allow_html=True,
+      )
       fig_hi = px.scatter(
           rfm,
           x="Recency",
           y="Monetary",
           color=rfm["Cluster_Hierarchical"].astype(str),
-          title="2. Hierarchical Clustering",
           template="plotly_dark",
       )
       fig_hi.update_layout(
@@ -249,16 +272,22 @@ if uploaded_file is not None:
           paper_bgcolor="#0b0f19",
           font=dict(size=10),
           showlegend=False,
+          margin=dict(l=10, r=10, t=10, b=10),
       )
       st.plotly_chart(fig_hi, use_container_width=True)
 
     with col_c:
+      st.markdown(
+          "<p"
+          " style='color: #fbbf24; font-weight: 700; font-size: 16px; margin:"
+          " 0;'>3. DBSCAN Clustering</p>",
+          unsafe_allow_html=True,
+      )
       fig_db = px.scatter(
           rfm,
           x="Recency",
           y="Monetary",
           color=rfm["Cluster_DBSCAN"].astype(str),
-          title="3. DBSCAN Clustering",
           template="plotly_dark",
       )
       fig_db.update_layout(
@@ -266,6 +295,7 @@ if uploaded_file is not None:
           paper_bgcolor="#0b0f19",
           font=dict(size=10),
           showlegend=False,
+          margin=dict(l=10, r=10, t=10, b=10),
       )
       st.plotly_chart(fig_db, use_container_width=True)
 
