@@ -7,23 +7,20 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="Phân Khúc Khách Hàng TMĐT", page_icon=None, layout="wide"
+    page_title="So Sánh 3 Thuật Toán Phân Khúc KH", page_icon=None, layout="wide"
 )
 
-# --- TÙY CHỈNH CSS (DARK EDITION, CHỮ TO, MÀU HỒNG NEON CHO TỔNG KHÁCH HÀNG) ---
+# --- TÙY CHỈNH CSS (MÀU HỒNG NEON CHO TỔNG KHÁCH HÀNG) ---
 st.markdown(
     """
     <style>
-    /* Tổng thể nền và font chữ */
     .stApp {
         background-color: #0b0f19;
         color: #f3f4f6;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
-    /* Tiêu đề chính */
     .main-title {
-        font-size: 38px;
+        font-size: 36px;
         font-weight: 800;
         color: #00e5ff;
         text-align: center;
@@ -31,24 +28,20 @@ st.markdown(
         margin-bottom: 5px;
     }
     .sub-title {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
         color: #93c5fd;
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
-    
-    /* Tiêu đề các mục lớn */
     h3 {
         color: #00e5ff !important;
-        font-size: 24px !important;
+        font-size: 22px !important;
         font-weight: 700 !important;
         border-bottom: 2px solid #1e293b;
-        padding-bottom: 8px;
-        margin-top: 25px !important;
+        padding-bottom: 6px;
+        margin-top: 20px !important;
     }
-    
-    /* Màu sắc các tab hiển thị rõ ràng */
     .stTabs [data-baseweb="tab-list"] {
         gap: 15px;
         background-color: #0b0f19;
@@ -58,9 +51,9 @@ st.markdown(
         background-color: #1e293b;
         border-radius: 6px;
         color: #e2e8f0;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
-        padding: 10px 20px;
+        padding: 8px 18px;
         border: 1px solid #334155;
     }
     .stTabs [aria-selected="true"] {
@@ -68,37 +61,31 @@ st.markdown(
         color: #0b0f19 !important;
         border: 1px solid #00e5ff !important;
     }
-
-    /* Các khối chú thích và giải thích trực quan */
     .note-box {
         background-color: #111827;
         border-left: 4px solid #00e5ff;
-        padding: 15px;
+        padding: 12px;
         border-radius: 4px;
-        margin: 15px 0;
-        font-size: 16px;
+        margin: 12px 0;
+        font-size: 15px;
         color: #e5e7eb;
-        line-height: 1.6;
+        line-height: 1.5;
     }
     .note-title {
         font-weight: 700;
         color: #38bdf8;
-        margin-bottom: 5px;
-        font-size: 17px;
+        margin-bottom: 4px;
     }
-
-    /* Tùy chỉnh Sidebar */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
     }
     [data-testid="stSidebar"] label {
         color: #e5e7eb !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 600 !important;
     }
-
-    /* Đổi màu Hồng Neon cho chỉ số "Tổng khách hàng" (Cột metric đầu tiên) */
+    /* Hồng Neon cho Tổng khách hàng */
     [data-testid="stMetric"]:nth-of-type(1) [data-testid="stMetricLabel"] {
         color: #ff007f !important;
         font-weight: 700 !important;
@@ -114,17 +101,17 @@ st.markdown(
 
 # --- TIÊU ĐỀ TRANG ---
 st.markdown(
-    '<p class="main-title">PHÂN KHÚC KHÁCH HÀNG THƯƠNG MẠI ĐIỆN TỬ</p>',
+    '<p class="main-title">HỆ THỐNG SO SÁNH 3 THUẬT TOÁN PHÂN KHÚC KHÁCH HÀNG</p>',
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Hệ thống phân tích hành vi khách hàng nâng cao kết hợp Học máy và Chỉ số RFM</p>',
+    '<p class="sub-title">Phân tích hành vi RFM tích hợp đồng thời K-Means, Hierarchical và DBSCAN</p>',
     unsafe_allow_html=True,
 )
 
 # --- THANH BÊN (SIDEBAR) ---
 st.sidebar.markdown(
-    "<h3 style='font-size:20px !important; border:none;'>Cấu hình hệ thống</h3>",
+    "<h3 style='font-size:18px !important; border:none;'>Cấu hình hệ thống</h3>",
     unsafe_allow_html=True,
 )
 uploaded_file = st.sidebar.file_uploader(
@@ -156,21 +143,16 @@ if uploaded_file is not None:
       rename_dict[col] = "UnitPrice"
 
   df = df.rename(columns=rename_dict)
-
   required_cols = ["CustomerID", "InvoiceDate", "InvoiceNo", "Quantity", "UnitPrice"]
   missing = [c for c in required_cols if c not in df.columns]
   if missing:
-    st.error(
-        f"File CSV thiếu các cột bắt buộc: {missing}. Các cột hiện có trong file"
-        f" là: {list(df.columns)}"
-    )
+    st.error(f"File thiếu cột bắt buộc: {missing}")
     st.stop()
 
-  # --- XỬ LÝ DỮ LIỆU & CHỈ SỐ RFM ---
+  # --- XỬ LÝ RFM ---
   df = df.dropna(subset=["CustomerID"])
   df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
   df["TotalSum"] = df["Quantity"] * df["UnitPrice"]
-
   snapshot_date = df["InvoiceDate"].max() + pd.Timedelta(days=1)
 
   rfm = (
@@ -182,47 +164,26 @@ if uploaded_file is not None:
       })
       .reset_index()
   )
-
   rfm.columns = ["CustomerID", "Recency", "Frequency", "Monetary"]
   rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
 
-  # --- SIDEBAR THUẬT TOÁN ---
-  st.sidebar.markdown(
-      "<h3 style='font-size:20px !important; border:none; margin-top:20px"
-      " !important;'>Thuật toán Phân cụm</h3>",
-      unsafe_allow_html=True,
-  )
-  algorithm = st.sidebar.selectbox(
-      "Chọn thuật toán", ["K-Means", "Hierarchical", "DBSCAN"]
-  )
+  # --- CHẠY ĐỒNG THỜI CẢ 3 THUẬT TOÁN ---
+  scaler = StandardScaler()
+  rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
-  if algorithm == "K-Means":
-    n_clusters = st.sidebar.slider("Số lượng cụm", 2, 8, 4)
-    scaler = StandardScaler()
-    rfm_scaled = scaler.fit_transform(
-        rfm[["Recency", "Frequency", "Monetary"]]
-    )
-    model = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-    rfm["Cluster"] = model.fit_predict(rfm_scaled)
-  elif algorithm == "Hierarchical":
-    n_clusters = st.sidebar.slider("Số lượng cụm", 2, 8, 4)
-    scaler = StandardScaler()
-    rfm_scaled = scaler.fit_transform(
-        rfm[["Recency", "Frequency", "Monetary"]]
-    )
-    model = AgglomerativeClustering(n_clusters=n_clusters)
-    rfm["Cluster"] = model.fit_predict(rfm_scaled)
-  else:
-    eps = st.sidebar.slider("EPS", 0.1, 5.0, 0.5)
-    min_samples = st.sidebar.slider("Min Samples", 2, 20, 5)
-    scaler = StandardScaler()
-    rfm_scaled = scaler.fit_transform(
-        rfm[["Recency", "Frequency", "Monetary"]]
-    )
-    model = DBSCAN(eps=eps, min_samples=min_samples)
-    rfm["Cluster"] = model.fit_predict(rfm_scaled)
+  # 1. K-Means (Mặc định 3 cụm)
+  kmeans_model = KMeans(n_clusters=3, random_state=42, n_init=10)
+  rfm["Cluster_KMeans"] = kmeans_model.fit_predict(rfm_scaled)
 
-  # --- CÁC CHỈ SỐ TỔNG QUAN (METRICS) ---
+  # 2. Hierarchical (Mặc định 3 cụm)
+  hier_model = AgglomerativeClustering(n_clusters=3)
+  rfm["Cluster_Hierarchical"] = hier_model.fit_predict(rfm_scaled)
+
+  # 3. DBSCAN
+  dbscan_model = DBSCAN(eps=0.5, min_samples=5)
+  rfm["Cluster_DBSCAN"] = dbscan_model.fit_predict(rfm_scaled)
+
+  # --- CÁC CHỈ SỐ TỔNG QUAN ---
   col1, col2, col3, col4 = st.columns(4)
   with col1:
     st.metric("Tổng khách hàng", f"{len(rfm):,}")
@@ -231,126 +192,114 @@ if uploaded_file is not None:
   with col3:
     st.metric("Tần suất mua TB", f"{rfm['Frequency'].mean():.1f} lần")
   with col4:
-    st.metric("Số cụm phân tách", f"{rfm['Cluster'].nunique()}")
+    st.metric("Số thuật toán tích hợp", "3 Thuật toán")
 
   st.markdown("<br>", unsafe_allow_html=True)
 
   # --- CÁC TAB NỘI DUNG ---
-  tab1, tab2, tab3 = st.tabs(
-      ["Trực quan hóa và Phân tích", "Thống kê chi tiết cụm", "Dữ liệu khách hàng"]
-  )
+  tab1, tab2, tab3 = st.tabs([
+      "Trực quan hóa 3 Thuật toán",
+      "Thống kê chi tiết các cụm",
+      "Dữ liệu khách hàng tổng hợp",
+  ])
 
   with tab1:
-    st.markdown("<h3>BIỂU ĐỒ TƯƠNG TÁC VÀ TỶ LỆ PHÂN KHÚC</h3>", unsafe_allow_html=True)
-    
+    st.markdown("<h3>SO SÁNH BIỂU ĐỒ PHÂN TÁN CỦA 3 THUẬT TOÁN</h3>", unsafe_allow_html=True)
     st.markdown(
         """
         <div class="note-box">
-            <div class="note-title">Hướng dẫn đọc biểu đồ</div>
-            Biểu đồ phân tán thể hiện mối quan hệ giữa thời gian mua hàng gần nhất (Recency) và tổng chi tiêu (Monetary). 
-            Biểu đồ tròn bên cạnh minh họa tỷ trọng phân bổ số lượng khách hàng của từng nhóm phân khúc trên tổng thể hệ thống.
+            <div class="note-title">Tổng quan song song</div>
+            Dưới đây là kết quả phân khúc đồng thời từ 3 mô hình học máy: <b>K-Means</b>, <b>Hierarchical Clustering</b> và <b>DBSCAN</b> giúp hội đồng dễ dàng so sánh độ hiệu quả trực quan.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col_l, col_r = st.columns([2, 1])
+    # Hiển thị 3 biểu đồ nằm trên 3 cột riêng biệt hoặc xếp dọc rõ ràng
+    col_a, col_b, col_c = st.columns(3)
 
-    with col_l:
-      fig_scatter = px.scatter(
+    with col_a:
+      fig_km = px.scatter(
           rfm,
           x="Recency",
           y="Monetary",
-          color=rfm["Cluster"].astype(str),
-          title="Mối quan hệ giữa Số ngày mua gần đây và Tổng chi tiêu",
+          color=rfm["Cluster_KMeans"].astype(str),
+          title="1. K-Means Clustering",
           template="plotly_dark",
-          color_discrete_sequence=px.colors.qualitative.Set2,
       )
-      fig_scatter.update_layout(
+      fig_km.update_layout(
           plot_bgcolor="#0b0f19",
           paper_bgcolor="#0b0f19",
-          font=dict(color="#f3f4f6", size=13),
+          font=dict(size=10),
+          showlegend=False,
       )
-      st.plotly_chart(fig_scatter, use_container_width=True)
+      st.plotly_chart(fig_km, use_container_width=True)
 
-    with col_r:
-      fig_pie = px.pie(
+    with col_b:
+      fig_hi = px.scatter(
           rfm,
-          names=rfm["Cluster"].astype(str),
-          title="Tỷ lệ phân bổ các cụm",
+          x="Recency",
+          y="Monetary",
+          color=rfm["Cluster_Hierarchical"].astype(str),
+          title="2. Hierarchical Clustering",
           template="plotly_dark",
-          color_discrete_sequence=px.colors.qualitative.Set2,
       )
-      fig_pie.update_layout(
+      fig_hi.update_layout(
           plot_bgcolor="#0b0f19",
           paper_bgcolor="#0b0f19",
-          font=dict(color="#f3f4f6", size=13),
+          font=dict(size=10),
+          showlegend=False,
       )
-      st.plotly_chart(fig_pie, use_container_width=True)
+      st.plotly_chart(fig_hi, use_container_width=True)
+
+    with col_c:
+      fig_db = px.scatter(
+          rfm,
+          x="Recency",
+          y="Monetary",
+          color=rfm["Cluster_DBSCAN"].astype(str),
+          title="3. DBSCAN Clustering",
+          template="plotly_dark",
+      )
+      fig_db.update_layout(
+          plot_bgcolor="#0b0f19",
+          paper_bgcolor="#0b0f19",
+          font=dict(size=10),
+          showlegend=False,
+      )
+      st.plotly_chart(fig_db, use_container_width=True)
 
   with tab2:
-    st.markdown("<h3>BẢNG TỔNG HỢP CHỈ SỐ TRUNG BÌNH THEO PHÂN KHÚC</h3>", unsafe_allow_html=True)
-    
-    st.markdown(
-        """
-        <div class="note-box">
-            <div class="note-title">Giải thích bảng số liệu</div>
-            Bảng dưới đây tổng hợp các giá trị trung bình về chỉ số RFM và quy mô số lượng khách hàng của từng nhóm cụm, 
-            giúp doanh nghiệp đánh giá chính xác giá trị và hành vi của từng phân khúc khách hàng.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+    st.markdown("<h3>THỐNG KÊ TRUNG BÌNH THEO CỤM (K-MEANS)</h3>", unsafe_allow_html=True)
     cluster_summary = (
-        rfm.groupby("Cluster")[["Recency", "Frequency", "Monetary"]]
+        rfm.groupby("Cluster_KMeans")[["Recency", "Frequency", "Monetary"]]
         .mean()
         .reset_index()
     )
     cluster_summary["Customer_Count"] = (
-        rfm.groupby("Cluster")["CustomerID"].count().values
+        rfm.groupby("Cluster_KMeans")["CustomerID"].count().values
     )
-
     cluster_summary = cluster_summary.rename(
         columns={
+            "Cluster_KMeans": "Cụm",
             "Recency": "Thời gian mua gần nhất TB (Ngày)",
             "Frequency": "Tần suất mua TB (Lần)",
             "Monetary": "Tổng chi tiêu TB ($)",
             "Customer_Count": "Số lượng khách hàng",
         }
     )
-
-    st.dataframe(
-        cluster_summary.style.format({
-            "Thời gian mua gần nhất TB (Ngày)": "{:.1f}",
-            "Tần suất mua TB (Lần)": "{:.1f}",
-            "Tổng chi tiêu TB ($)": "{:,.2f}",
-            "Số lượng khách hàng": "{:,}",
-        }),
-        use_container_width=True,
-    )
+    st.dataframe(cluster_summary, use_container_width=True)
 
   with tab3:
-    st.markdown("<h3>DANH SÁCH CHI TIẾT RFM CỦA KHÁCH HÀNG</h3>", unsafe_allow_html=True)
-    
-    st.markdown(
-        """
-        <div class="note-box">
-            <div class="note-title">Dữ liệu chi tiết</div>
-            Danh sách toàn bộ mã khách hàng đi kèm các chỉ số thành phần Recency, Frequency, Monetary và nhãn phân cụm tương ứng.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    
+    st.markdown("<h3>DANH SÁCH DỮ LIỆU RFM & KẾT QUẢ GOM CỤM</h3>", unsafe_allow_html=True)
     st.dataframe(rfm, use_container_width=True)
 
 else:
   st.markdown(
       """
-      <div style="text-align: center; padding: 50px; background-color: #111827; border-radius: 8px; border: 1px dashed #374151; margin-top: 50px;">
-          <h3 style="color: #00e5ff; border: none; margin-bottom: 10px;">CHƯA CÓ DỮ LIỆU ĐƯỢC TẢI LÊN</h3>
-          <p style="font-size: 16px; color: #9ca3af;">Vui lòng tải lên file dữ liệu <b>Online_Retail.csv</b> ở thanh cấu hình phía bên trái để khởi chạy hệ thống phân tích.</p>
+      <div style="text-align: center; padding: 40px; background-color: #111827; border-radius: 8px; border: 1px dashed #374151; margin-top: 40px;">
+          <h3 style="color: #00e5ff; border: none; margin-bottom: 10px;">CHƯA CÓ DỮ LIỆU TẢI LÊN</h3>
+          <p style="font-size: 15px; color: #9ca3af;">Hãy tải file <b>Online_Retail.csv</b> lên ở thanh menu bên trái để hệ thống tự động chạy đồng thời cả 3 thuật toán.</p>
       </div>
       """,
       unsafe_allow_html=True,
