@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Phân Khúc Khách Hàng TMĐT", page_icon=None, layout="wide"
 )
 
-# --- TÙY CHỈNH CSS (DARK EDITION, CHỮ TO, KHÔNG ICON, MÀU SẮC NỔI BẬT, DỄ NHÌN) ---
+# --- TÙY CHỈNH CSS (DARK EDITION, CHỮ TO, MÀU HỒNG NEON CHO TỔNG KHÁCH HÀNG) ---
 st.markdown(
     """
     <style>
@@ -48,7 +48,7 @@ st.markdown(
         margin-top: 25px !important;
     }
     
-    /* Màu sắc các tab hiển thị rõ ràng, không bị chìm */
+    /* Màu sắc các tab hiển thị rõ ràng */
     .stTabs [data-baseweb="tab-list"] {
         gap: 15px;
         background-color: #0b0f19;
@@ -97,6 +97,16 @@ st.markdown(
         font-size: 15px !important;
         font-weight: 600 !important;
     }
+
+    /* Đổi màu Hồng Neon cho chỉ số "Tổng khách hàng" (Cột metric đầu tiên) */
+    [data-testid="stMetric"]:nth-of-type(1) [data-testid="stMetricLabel"] {
+        color: #ff007f !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stMetric"]:nth-of-type(1) [data-testid="stMetricValue"] {
+        color: #ff007f !important;
+        text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+    }
     </style>
 """,
     unsafe_allow_html=True,
@@ -130,7 +140,7 @@ if uploaded_file is not None:
 
   df = load_data(uploaded_file)
 
-  # --- TỰ ĐỘNG CHUẨN HÓA TÊN CỘT ĐỂ KHÔNG BAO GIỜ BỊ LỖI KEYERROR ---
+  # --- TỰ ĐỘNG CHUẨN HÓA TÊN CỘT ---
   rename_dict = {}
   for col in df.columns:
     c_lower = col.lower().replace(" ", "").replace("_", "")
@@ -147,7 +157,6 @@ if uploaded_file is not None:
 
   df = df.rename(columns=rename_dict)
 
-  # Kiểm tra xem đã đủ các cột cốt lõi chưa
   required_cols = ["CustomerID", "InvoiceDate", "InvoiceNo", "Quantity", "UnitPrice"]
   missing = [c for c in required_cols if c not in df.columns]
   if missing:
@@ -226,7 +235,7 @@ if uploaded_file is not None:
 
   st.markdown("<br>", unsafe_allow_html=True)
 
-  # --- CÁC TAB NỘI DUNG (HOÀN TOÀN BẰNG TIẾNG VIỆT) ---
+  # --- CÁC TAB NỘI DUNG ---
   tab1, tab2, tab3 = st.tabs(
       ["Trực quan hóa và Phân tích", "Thống kê chi tiết cụm", "Dữ liệu khách hàng"]
   )
