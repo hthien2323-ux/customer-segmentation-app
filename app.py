@@ -7,7 +7,7 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="Phân Tích Doanh Thu & Khách Hàng",
+    page_title="Hệ Thống Phân Tích Doanh Thu & Khách Hàng",
     page_icon=None,
     layout="wide",
 )
@@ -93,7 +93,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Bảng điều khiển kinh doanh tổng hợp</p>',
+    '<p class="sub-title">Bảng điều khiển quản trị chuẩn hóa dữ liệu Anh (£)</p>',
     unsafe_allow_html=True,
 )
 
@@ -113,6 +113,12 @@ st.sidebar.markdown(
 )
 n_clusters_input = st.sidebar.slider("Số lượng nhóm khách hàng", 2, 8, 3)
 
+# Lựa chọn thuật toán để đồng bộ toàn hệ thống (Khắc phục lỗi P0 số 3)
+selected_algorithm = st.sidebar.selectbox(
+    "Chọn thuật toán phân tích",
+    ["K-Means", "Hierarchical Clustering", "DBSCAN"],
+)
+
 if uploaded_file is not None:
   @st.cache_data
   def load_data(file):
@@ -120,11 +126,12 @@ if uploaded_file is not None:
     data.columns = data.columns.str.strip()
     return data
 
-  df = load_data(uploaded_file)
+  df_raw = load_data(uploaded_file)
+  initial_rows = len(df_raw)
 
   # --- TỰ ĐỘNG CHUẨN HÓA TÊN CỘT ---
   rename_dict = {}
-  for col in df.columns:
+  for col in df_raw.columns:
     c_lower = col.lower().replace(" ", "").replace("_", "")
     if "customer" in c_lower:
       rename_dict[col] = "CustomerID"
@@ -137,21 +144,34 @@ if uploaded_file is not None:
     elif "unitprice" in c_lower or "price" in c_lower:
       rename_dict[col] = "UnitPrice"
 
-  df = df.rename(columns=rename_dict)
+  df = df_raw.rename(columns=rename_dict)
   required_cols = ["CustomerID", "InvoiceDate", "InvoiceNo", "Quantity", "UnitPrice"]
   missing = [c for c in required_cols if c not in df.columns]
   if missing:
     st.error(f"File thiếu cột bắt buộc: {missing}")
     st.stop()
 
-  # --- XỬ LÝ DỮ LIỆU & RFM ---
-  df = df.dropna(subset=["CustomerID"])
-  df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
-  df["TotalSum"] = df["Quantity"] * df["UnitPrice"]
-  snapshot_date = df["InvoiceDate"].max() + pd.Timedelta(days=1)
+  # --- XỬ LÝ & KIỂM SOÁT CHẤT LƯỢNG DỮ LIỆU (Khắc phục lỗi P0 số 2) ---
+  # Đếm số hóa đơn bị hủy (bắt đầu bằng chữ C hoặc số lượng âm)
+  df["InvoiceNo_Str"] = df["InvoiceNo"].astype(str)
+  cancelled_mask = df["InvoiceNo_Str"].str.startswith("C") | (df["Quantity"] <= 0)
+  cancelled_count = cancelled_mask.sum()
+
+  # Lọc dữ liệu hợp lệ: Có CustomerID, không phải hóa đơn hủy, giá > 0
+  df_clean = df.dropna(subset=["CustomerID"])
+  df_valid = df_clean[~df_clean["InvoiceNo_Str"].str.startswith("C") & (df_clean["Quantity"] > 0) & (df_clean["UnitPrice"] > 0)].copy()
+  
+  valid_rows = len(df_valid)
+  
+  df_valid["InvoiceDate"] = pd.to_datetime(df_valid["InvoiceDate"])
+  date_min = df_valid["InvoiceDate"].min().strftime("%Y-%m-%d")
+  date_max = df_valid["InvoiceDate"].max().strftime("%Y-%m-%d")
+
+  df_valid["TotalSum"] = df_valid["Quantity"] * df_valid["UnitPrice"]
+  snapshot_date = df_valid["InvoiceDate"].max() + pd.Timedelta(days=1)
 
   rfm = (
-      df.groupby("CustomerID")
+      df_valid.groupby("CustomerID")
       .agg({
           "InvoiceDate": lambda x: (snapshot_date - x.max()).days,
           "InvoiceNo": "nunique",
@@ -161,8 +181,9 @@ if uploaded_file is not None:
   )
   rfm.columns = ["CustomerID", "Recency", "Frequency", "Monetary"]
   rfm = rfm[(rfm["Monetary"] > 0) & (rfm["Frequency"] > 0)]
+  valid_customers = len(rfm)
 
-  # --- CHẠY 3 THUẬT TOÁN ---
+  # --- CHẠY CÁC THUẬT TOÁN PHÂN CỤM ---
   scaler = StandardScaler()
   rfm_scaled = scaler.fit_transform(rfm[["Recency", "Frequency", "Monetary"]])
 
@@ -176,26 +197,49 @@ if uploaded_file is not None:
       rfm_scaled
   )
 
-  # --- CHỈ SỐ TỔNG QUAN ---
+  # Ánh xạ tên thuật toán sang tên cột trong dataframe
+  cluster_col_map = {
+      "K-Means": "Cluster_KMeans",
+      "Hierarchical Clustering": "Cluster_Hierarchical",
+      "DBSCAN": "Cluster_DBSCAN",
+  }
+  active_cluster_col = cluster_col_map[selected_algorithm]
+
+  # --- HIỂN THỊ KHU VỰC THÔNG TIN KIỂM SOÁT DỮ LIỆU (P0 số 2) ---
+  with st.expander("📊 Chi tiết tiền xử lý & Kiểm soát chất lượng dữ liệu (Data Quality Summary)"):
+    col_q1, col_q2, col_q3 = st.columns(3)
+    with col_q1:
+      st.markdown(f"**Số dòng dữ liệu ban đầu:** {initial_rows:,}")
+      st.markdown(f"**Số dòng dữ liệu hợp lệ:** {valid_rows:,}")
+    with col_q2:
+      st.markdown(f"**Số hóa đơn hủy / loại bỏ:** {cancelled_count:,}")
+      st.markdown(f"**Số khách hàng hợp lệ phân tích:** {valid_customers:,}")
+    with col_q3:
+      st.markdown(f"**Khoảng thời gian phân tích:** {date_min} đến {date_max}")
+      st.markdown("**Quy tắc tính:** $\\text{Revenue} = \\sum (Quantity \\times UnitPrice)$ (Đơn vị: Bảng Anh £)")
+
+  st.markdown("<br>", unsafe_allow_html=True)
+
+  # --- CHỈ SỐ TỔNG QUAN (Chuẩn hóa đơn vị £ - Khắc phục lỗi P0 số 1) ---
   total_revenue = rfm["Monetary"].sum()
   total_customers = len(rfm)
 
   col1, col2, col3, col4 = st.columns(4)
   with col1:
-    st.metric("Tổng doanh thu ($)", f"${total_revenue:,.0f}")
+    st.metric("Tổng doanh thu (£)", f"£{total_revenue:,.2f}")
   with col2:
     st.metric("Tổng khách hàng", f"{total_customers:,}")
   with col3:
-    st.metric("Doanh thu TB / Khách", f"${total_revenue/total_customers:,.2f}")
+    st.metric("Doanh thu TB / Khách (£)", f"£{total_revenue/total_customers:,.2f}")
   with col4:
-    st.metric("Công nghệ phân tích", "Hệ thống Kết hợp AI")
+    st.metric("Thuật toán đang chọn", selected_algorithm)
 
   st.markdown("<br>", unsafe_allow_html=True)
 
   # --- CÁC TAB QUẢN TRỊ ---
   tab1, tab2, tab3 = st.tabs([
       "Tổng quan Doanh thu",
-      "Hiệu suất Từng Nhóm",
+      f"Hiệu suất Từng Nhóm ({selected_algorithm})",
       "Danh sách Khách hàng",
   ])
 
@@ -208,7 +252,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
-          " 0 0 5px 0;'>1. Phân nhóm khách mua</p>",
+          " 0 0 5px 0;'>1. Phân nhóm khách mua (K-Means)</p>",
           unsafe_allow_html=True,
       )
       fig_km = px.scatter(
@@ -231,7 +275,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
-          " 0 0 5px 0;'>2. Phân loại theo cấp</p>",
+          " 0 0 5px 0;'>2. Phân loại theo cấp (Hierarchical)</p>",
           unsafe_allow_html=True,
       )
       fig_hi = px.scatter(
@@ -254,7 +298,7 @@ if uploaded_file is not None:
       st.markdown(
           "<p"
           " style='color: #fbbf24; font-weight: 700; font-size: 14px; margin:"
-          " 0 0 5px 0;'>3. Lọc khách hàng VIP</p>",
+          " 0 0 5px 0;'>3. Lọc khách hàng VIP (DBSCAN)</p>",
           unsafe_allow_html=True,
       )
       fig_db = px.scatter(
@@ -274,10 +318,11 @@ if uploaded_file is not None:
       st.plotly_chart(fig_db, use_container_width=True)
 
   with tab2:
-    st.markdown("<h3>BÁO CÁO ĐÓNG GÓP DOANH THU</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3>BÁO CÁO ĐÓNG GÓP DOANH THU THEO {selected_algorithm.upper()}</h3>", unsafe_allow_html=True)
     
+    # Tổng hợp theo thuật toán đang được người dùng chọn (Khắc phục lỗi P0 số 3)
     revenue_summary = (
-        rfm.groupby("Cluster_KMeans")
+        rfm.groupby(active_cluster_col)
         .agg(
             Customer_Count=("CustomerID", "count"),
             Total_Revenue=("Monetary", "sum"),
@@ -294,23 +339,23 @@ if uploaded_file is not None:
 
     revenue_summary = revenue_summary.rename(
         columns={
-            "Cluster_KMeans": "Nhóm Khách Hàng",
+            active_cluster_col: "Nhóm Khách Hàng",
             "Customer_Count": "Số lượng KH (Người)",
-            "Total_Revenue": "Tổng doanh thu ($)",
+            "Total_Revenue": "Tổng doanh thu (£)",
             "Revenue_Share(%)": "Tỷ trọng đóng góp (%)",
             "Avg_Recency": "Số ngày mua gần nhất TB (Ngày)",
             "Avg_Frequency": "Tần suất mua TB (Lần)",
-            "Avg_Monetary": "Chi tiêu TB / KH ($)",
+            "Avg_Monetary": "Chi tiêu TB / KH (£)",
         }
     )
 
     st.dataframe(
         revenue_summary.style.format({
-            "Tổng doanh thu ($)": "{:,.2f}",
+            "Tổng doanh thu (£)": "{:,.2f}",
             "Tỷ trọng đóng góp (%)": "{:.2f}%",
             "Số ngày mua gần nhất TB (Ngày)": "{:.1f}",
             "Tần suất mua TB (Lần)": "{:.1f}",
-            "Chi tiêu TB / KH ($)": "{:,.2f}",
+            "Chi tiêu TB / KH (£)": "{:,.2f}",
             "Số lượng KH (Người)": "{:,}",
         }),
         use_container_width=True,
@@ -319,9 +364,9 @@ if uploaded_file is not None:
     fig_rev = px.bar(
         revenue_summary,
         x="Nhóm Khách Hàng",
-        y="Tổng doanh thu ($)",
+        y="Tổng doanh thu (£)",
         text="Tỷ trọng đóng góp (%)",
-        title="Biểu đồ phân bổ doanh thu theo nhóm khách hàng",
+        title=f"Biểu đồ phân bổ doanh thu theo nhóm ({selected_algorithm})",
         template="plotly_dark",
     )
     fig_rev.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
