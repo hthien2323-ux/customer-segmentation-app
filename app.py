@@ -8,12 +8,11 @@ import streamlit as st
 
 # --- CẤU HÌNH GIAO DIỆN ---
 st.set_page_config(
-    page_title="Hệ Thống Phân Tích Doanh Thu & Khách Hàng",
-    page_icon=None,
+    page_title="Hệ Thống Phân Tích Doanh Thu và Khách Hàng",
     layout="wide",
 )
 
-# --- TÙY CHỈNH CSS ĐỂ MÀU SẮC NỔI BẬT VÀ RÕ RÀNG ---
+# --- TÙY CHỈNH CSS CHUYÊN NGHIỆP, TỐI GIẢN, NỔI BẬT ---
 st.markdown(
     """
     <style>
@@ -23,68 +22,68 @@ st.markdown(
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .main-title {
-        font-size: 30px;
-        font-weight: 800;
+        font-size: 26px;
+        font-weight: 700;
         color: #00f2fe;
         text-align: center;
         margin-bottom: 2px;
-        text-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        letter-spacing: 0.5px;
     }
     .sub-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: #cbd5e1;
+        font-size: 13px;
+        font-weight: 500;
+        color: #94a3b8;
         text-align: center;
         margin-bottom: 25px;
+        letter-spacing: 0.3px;
     }
     h3 {
         color: #00f2fe !important;
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        border-bottom: 2px solid #1e293b;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        border-bottom: 1px solid #1e293b;
         padding-bottom: 6px;
         margin-top: 20px !important;
+        letter-spacing: 0.3px;
     }
-    /* Làm nổi bật các Tab: Tab đang chọn sáng rực, Tab chưa chọn chữ trắng rõ ràng không bị mờ */
+    /* Tùy chỉnh Tab chuyên nghiệp, sắc nét */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
+        gap: 8px;
         background-color: #05070c;
-        padding: 10px 0;
+        padding: 8px 0;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #1e293b;
-        border-radius: 8px;
-        color: #f1f5f9;
-        font-size: 14px;
+        background-color: #0f172a;
+        border-radius: 4px;
+        color: #cbd5e1;
+        font-size: 13px;
         font-weight: 600;
-        padding: 10px 20px;
-        border: 1px solid #475569;
+        padding: 8px 16px;
+        border: 1px solid #334155;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+        background: #00f2fe !important;
         color: #05070c !important;
-        font-weight: 800;
+        font-weight: 700;
         border: 1px solid #00f2fe !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
     }
     [data-testid="stSidebar"] {
-        background-color: #0f172a;
+        background-color: #090d16;
         border-right: 1px solid #1e293b;
     }
     [data-testid="stSidebar"] label {
         color: #f8fafc !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         font-weight: 600 !important;
     }
-    /* Tùy chỉnh màu Metric nổi bật */
+    /* Tùy chỉnh màu Metric nổi bật, rõ ràng */
     [data-testid="stMetricValue"] {
         color: #38bdf8 !important;
-        font-weight: 800 !important;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        font-weight: 700 !important;
     }
     [data-testid="stMetricLabel"] {
-        color: #e2e8f0 !important;
-        font-weight: 700 !important;
+        color: #cbd5e1 !important;
+        font-weight: 600 !important;
     }
     </style>
 """,
@@ -97,38 +96,38 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p class="sub-title">Bảng điều khiển quản trị chuẩn hóa dữ liệu Anh (£) - Đa thuật toán & Giao diện tối ưu tương tác</p>',
+    '<p class="sub-title">Bảng điều khiển quản trị dữ liệu Anh (£) - Đa thuật toán & Tối ưu hóa phân khúc hành vi</p>',
     unsafe_allow_html=True,
 )
 
 # --- THANH BÊN (SIDEBAR) ---
 st.sidebar.markdown(
-    "<h3 style='font-size:16px !important; border:none; color:#38bdf8 !important;'>Cấu hình hệ thống</h3>",
+    "<h3 style='font-size:15px !important; border:none; color:#38bdf8 !important;'>Cấu hình hệ thống</h3>",
     unsafe_allow_html=True,
 )
 uploaded_file = st.sidebar.file_uploader(
-    "Tải lên file Online_Retail.csv", type=["csv"]
+    "Tải lên tệp dữ liệu (Online_Retail.csv)", type=["csv"]
 )
 
 st.sidebar.markdown(
-    "<h3 style='font-size:15px !important; border:none; margin-top:15px !important; color:#38bdf8 !important;'>Bộ lọc kinh doanh</h3>",
+    "<h3 style='font-size:14px !important; border:none; margin-top:15px !important; color:#38bdf8 !important;'>Bộ lọc kinh doanh</h3>",
     unsafe_allow_html=True,
 )
 
 # Bộ chọn thuật toán
 selected_algorithm = st.sidebar.selectbox(
-    "Chọn thuật toán phân tích",
+    "Thuật toán phân tích",
     ["K-Means", "Hierarchical Clustering", "DBSCAN"],
 )
 
-# Ẩn hoặc vô hiệu hóa slider số nhóm khi dùng DBSCAN
+# Xử lý thông số thuật toán
 if selected_algorithm == "DBSCAN":
-  st.sidebar.info("DBSCAN tự động xác định số nhóm dựa trên mật độ. Slider số nhóm tạm vô hiệu hóa.")
+  st.sidebar.info("DBSCAN xác định nhóm dựa trên mật độ. Số lượng nhóm tự động khởi tạo.")
   n_clusters_input = 3
-  eps_val = st.sidebar.slider("DBSCAN eps", 0.1, 2.0, 0.5, 0.1)
-  min_samples_val = st.sidebar.slider("DBSCAN min_samples", 2, 20, 5)
+  eps_val = st.sidebar.slider("Tham số eps", 0.1, 2.0, 0.5, 0.1)
+  min_samples_val = st.sidebar.slider("Tham số min_samples", 2, 20, 5)
 else:
-  n_clusters_input = st.sidebar.slider("Số lượng nhóm khách hàng", 2, 8, 3)
+  n_clusters_input = st.sidebar.slider("Số lượng nhóm phân khúc", 2, 8, 3)
   eps_val, min_samples_val = 0.5, 5
 
 if uploaded_file is not None:
@@ -141,7 +140,7 @@ if uploaded_file is not None:
   try:
     df_raw = load_data(uploaded_file)
   except Exception as e:
-    st.error(f"Lỗi khi đọc file đầu vào: {e}")
+    st.error(f"Lỗi khi đọc tệp đầu vào: {e}")
     st.stop()
 
   initial_rows = len(df_raw)
@@ -165,7 +164,7 @@ if uploaded_file is not None:
   required_cols = ["CustomerID", "InvoiceDate", "InvoiceNo", "Quantity", "UnitPrice"]
   missing = [c for c in required_cols if c not in df.columns]
   if missing:
-    st.error(f"File đầu vào không hợp lệ! Thiếu các cột bắt buộc: {missing}.")
+    st.error(f"Tệp đầu vào thiếu các cột bắt buộc: {missing}.")
     st.stop()
 
   # --- XỬ LÝ LỌC ĐƠN HỦY & CHẤT LƯỢNG DỮ LIỆU ---
@@ -192,7 +191,7 @@ if uploaded_file is not None:
   df_valid["TotalSum"] = df_valid["Quantity"] * df_valid["UnitPrice"]
   snapshot_date = df_valid["InvoiceDate"].max() + pd.Timedelta(days=1)
 
-  # Tạo bảng RFM
+  # Tạo bảng RFM chuẩn hóa
   rfm = (
       df_valid.groupby("CustomerID")
       .agg({
@@ -211,7 +210,7 @@ if uploaded_file is not None:
   scaler = StandardScaler()
   rfm_scaled = scaler.fit_transform(rfm_log)
 
-  # Chạy 3 thuật toán
+  # Thực thi 3 thuật toán
   rfm["Cluster_KMeans"] = KMeans(
       n_clusters=n_clusters_input, random_state=42, n_init=10
   ).fit_predict(rfm_scaled)
@@ -231,7 +230,7 @@ if uploaded_file is not None:
   }
   active_cluster_col = cluster_col_map[selected_algorithm]
 
-  # --- HÀM ÁNH XẠ NHÃN SANG TÊN KINH DOANH Ý NGHĨA ---
+  # --- HÀM ÁNH XẠ NHÃN KINH DOANH ---
   def map_cluster_names(df_sub, cluster_col):
     grouped_m = df_sub.groupby(cluster_col)["Monetary"].mean().reset_index()
     grouped_m = grouped_m.sort_values(by="Monetary", ascending=False)
@@ -261,22 +260,22 @@ if uploaded_file is not None:
   except:
     score = 0.0
 
-  # --- HIỂN THỊ THỐNG KÊ TIỀN XỬ LÝ ---
-  with st.expander("📊 Chi tiết tiền xử lý & Kiểm soát chất lượng dữ liệu (Data Quality Summary)"):
+  # --- TỔNG KẾT CHẤT LƯỢNG DỮ LIỆU ---
+  with st.expander("Kiểm soát chất lượng dữ liệu và Thông số tiền xử lý"):
     col_q1, col_q2, col_q3 = st.columns(3)
     with col_q1:
-      st.markdown(f"**Số dòng dữ liệu ban đầu:** `{initial_rows:,}`")
-      st.markdown(f"**Số dòng dữ liệu hợp lệ:** `{valid_rows:,}`")
+      st.markdown(f"**Tổng số dòng ban đầu:** `{initial_rows:,}`")
+      st.markdown(f"**Số dòng hợp lệ:** `{valid_rows:,}`")
     with col_q2:
-      st.markdown(f"**Số hóa đơn hủy / hoàn trả (C...):** `{cancelled_count:,}`")
-      st.markdown(f"**Số khách hàng duy nhất hợp lệ:** `{valid_customers:,}`")
+      st.markdown(f"**Số hóa đơn hủy / hoàn trả:** `{cancelled_count:,}`")
+      st.markdown(f"**Khách hàng duy nhất hợp lệ:** `{valid_customers:,}`")
     with col_q3:
-      st.markdown(f"**Khoảng thời gian phân tích:** `{date_min} đến {date_max}`")
-      st.markdown(f"**Chỉ số Silhouette Score ({selected_algorithm}):** `{score:.3f}`")
+      st.markdown(f"**Khoảng thời gian:** `{date_min} đến {date_max}`")
+      st.markdown(f"**Hệ số Silhouette Score:** `{score:.3f}`")
 
   st.markdown("<br>", unsafe_allow_html=True)
 
-  # --- CHỈ SỐ TỔNG QUAN ---
+  # --- CHỈ SỐ TỔNG QUAN (METRICS) ---
   total_revenue = rfm["Monetary"].sum()
   total_customers = len(rfm)
 
@@ -288,51 +287,51 @@ if uploaded_file is not None:
   with col3:
     st.metric("Doanh thu TB / Khách (£)", f"£{total_revenue/total_customers:,.2f}")
   with col4:
-    st.metric("Thuật toán", selected_algorithm)
+    st.metric("Thuật toán đang chọn", selected_algorithm)
 
   st.markdown("<br>", unsafe_allow_html=True)
 
-  # --- CÁC TAB QUẢN TRỊ ---
+  # --- CÁC TAB CHỨC NĂNG ---
   tab1, tab2, tab3 = st.tabs([
-      "📊 Tổng quan Doanh thu & Biểu đồ",
-      f"🚀 Hiệu suất & Gợi ý ({selected_algorithm})",
-      "👥 Danh sách Khách hàng",
+      "Tổng quan Doanh thu & Phân phối",
+      f"Hiệu suất & Đề xuất chiến lược ({selected_algorithm})",
+      "Danh sách Khách hàng chi tiết",
   ])
 
   with tab1:
-    st.markdown("<h3>GÓC NHÌN ĐA CHIỀU HÀNH VI KHÁCH HÀNG (LOG SCALE)</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #94a3b8; font-size: 13px;'>Trực quan hóa phân phối hành vi qua Log-transform giúp xử lý triệt để các điểm dữ liệu lớn (>250k):</p>", unsafe_allow_html=True)
+    st.markdown("<h3>PHÂN TÍCH HÀNH VI KHÁCH HÀNG (LOG SCALE)</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #94a3b8; font-size: 13px;'>Trực quan hóa phân phối hành vi qua Log-transform nhằm xử lý các giá trị lớn:</p>", unsafe_allow_html=True)
 
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
-      st.markdown("<p style='color: #38bdf8; font-weight: 700; font-size: 14px;'>1. K-Means (Log)</p>", unsafe_allow_html=True)
+      st.markdown("<p style='color: #38bdf8; font-weight: 600; font-size: 13px;'>1. K-Means (Log)</p>", unsafe_allow_html=True)
       fig_km = px.scatter(
           rfm, x="Recency", y="Monetary", color=rfm["Cluster_KMeans"].astype(str),
           template="plotly_dark", log_y=True,
           labels={"color": "Nhóm", "Recency": "Số ngày", "Monetary": "Chi tiêu (£)"}
       )
-      fig_km.update_layout(plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
+      fig_km.update_layout(plot_bgcolor="#090d16", paper_bgcolor="#090d16", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
       st.plotly_chart(fig_km, use_container_width=True)
 
     with col_b:
-      st.markdown("<p style='color: #38bdf8; font-weight: 700; font-size: 14px;'>2. Hierarchical (Log)</p>", unsafe_allow_html=True)
+      st.markdown("<p style='color: #38bdf8; font-weight: 600; font-size: 13px;'>2. Hierarchical (Log)</p>", unsafe_allow_html=True)
       fig_hi = px.scatter(
           rfm, x="Recency", y="Monetary", color=rfm["Cluster_Hierarchical"].astype(str),
           template="plotly_dark", log_y=True,
           labels={"color": "Nhóm", "Recency": "Số ngày", "Monetary": "Chi tiêu (£)"}
       )
-      fig_hi.update_layout(plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
+      fig_hi.update_layout(plot_bgcolor="#090d16", paper_bgcolor="#090d16", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
       st.plotly_chart(fig_hi, use_container_width=True)
 
     with col_c:
-      st.markdown("<p style='color: #38bdf8; font-weight: 700; font-size: 14px;'>3. DBSCAN (Log)</p>", unsafe_allow_html=True)
+      st.markdown("<p style='color: #38bdf8; font-weight: 600; font-size: 13px;'>3. DBSCAN (Log)</p>", unsafe_allow_html=True)
       fig_db = px.scatter(
           rfm, x="Recency", y="Monetary", color=rfm["Cluster_DBSCAN"].astype(str),
           template="plotly_dark", log_y=True,
           labels={"color": "Nhóm", "Recency": "Số ngày", "Monetary": "Chi tiêu (£)"}
       )
-      fig_db.update_layout(plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
+      fig_db.update_layout(plot_bgcolor="#090d16", paper_bgcolor="#090d16", font=dict(size=10), showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
       st.plotly_chart(fig_db, use_container_width=True)
 
   with tab2:
@@ -398,16 +397,16 @@ if uploaded_file is not None:
     )
     fig_rev.update_traces(texttemplate='%{text:.1f}%', textposition='outside', marker_color='#38bdf8')
     fig_rev.update_layout(
-        plot_bgcolor="#0b0f19",
-        paper_bgcolor="#0b0f19",
-        title_font=dict(color="#f8fafc", size=16),
+        plot_bgcolor="#090d16",
+        paper_bgcolor="#090d16",
+        title_font=dict(color="#f8fafc", size=15),
         xaxis=dict(title_font=dict(color="#f8fafc"), tickfont=dict(color="#f8fafc")),
         yaxis=dict(title_font=dict(color="#f8fafc"), tickfont=dict(color="#f8fafc"))
     )
     st.plotly_chart(fig_rev, use_container_width=True)
 
-    st.markdown("<h3>GỢI Ý HÀNH ĐỘNG CHIẾN LƯỢC (CHƯA KIỂM CHỨNG THỰC NGHIỆM)</h3>", unsafe_allow_html=True)
-    st.info("Lưu ý: Các đề xuất dưới đây dựa trên phân tích đặc tính RFM thực tế và cần được kiểm chứng thông qua A/B testing trước khi triển khai quy mô lớn.")
+    st.markdown("<h3>ĐỀ XUẤT HÀNH ĐỘNG CHIẾN LƯỢC</h3>", unsafe_allow_html=True)
+    st.info("Lưu ý: Các đề xuất dưới đây được thiết lập dựa trên đặc tính RFM thực tế của từng phân khúc.")
     
     for idx, row in revenue_summary.iterrows():
       seg_name = row["Phân khúc khách hàng"]
@@ -415,25 +414,25 @@ if uploaded_file is not None:
       count = row["Số lượng KH (Người)"]
       
       if "VIP" in seg_name:
-        action = "Dự án chăm sóc đặc quyền, tặng voucher sinh nhật, dịch vụ hỗ trợ ưu tiên (VIP Support) để duy trì lòng trung thành."
+        action = "Xây dựng chính sách chăm sóc đặc quyền, hỗ trợ ưu tiên và các gói dịch vụ giá trị gia tăng."
       elif "trung thành" in seg_name:
-        action = "Chương trình tích điểm thân thiết, giới thiệu sản phẩm chéo (Cross-selling) và upsell dòng sản phẩm cao cấp."
+        action = "Duy trì tương tác qua chương trình tích điểm, giới thiệu sản phẩm chéo và ưu đãi dòng sản phẩm cao cấp."
       elif "ngủ đông" in seg_name:
-        action = "Triển khai chiến dịch Win-back (gửi email nhắc nhở, mã giảm giá kích hoạt lại lần mua tiếp theo sau thời gian vắng bóng)."
+        action = "Triển khai chiến dịch tái kích hoạt qua email nhắc nhở và các chương trình ưu đãi đặc biệt."
       else:
-        action = "Theo dõi hành vi phát sinh và tối ưu hóa chi phí tiếp cận qua các kênh quảng cáo đại trà."
+        action = "Theo dõi hành vi phát sinh và tối ưu hóa chi phí tiếp cận qua các kênh truyền thông."
         
-      st.markdown(f"* **{seg_name}** (`{count:,} khách hàng`, chiếm **{share:.2f}%** doanh thu): {action}")
+      st.markdown(f"- **{seg_name}** (`{count:,} khách hàng`, chiếm **{share:.2f}%** tổng doanh thu): {action}")
 
   with tab3:
     st.markdown("<h3>CHI TIẾT KHÁCH HÀNG & BỘ LỌC PHÂN KHÚC</h3>", unsafe_allow_html=True)
     
     col_f1, col_f2 = st.columns(2)
     with col_f1:
-      search_query = st.text_input("🔍 Tìm kiếm theo Mã Khách Hàng (CustomerID):", "")
+      search_query = st.text_input("Tìm kiếm theo Mã Khách Hàng (CustomerID):", "")
     with col_f2:
       unique_segments = ["Tất cả"] + list(rfm["Segment_Name"].unique())
-      selected_seg_filter = st.selectbox("📂 Lọc theo phân khúc kinh doanh:", unique_segments)
+      selected_seg_filter = st.selectbox("Lọc theo phân khúc kinh doanh:", unique_segments)
 
     filtered_rfm = rfm.copy()
     if search_query:
@@ -445,7 +444,7 @@ if uploaded_file is not None:
 
     csv_data = filtered_rfm.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Tải xuống danh sách khách hàng (.csv)",
+        label="Tải xuống danh sách khách hàng (.csv)",
         data=csv_data,
         file_name="customer_segmentation_results.csv",
         mime="text/csv",
@@ -454,9 +453,9 @@ if uploaded_file is not None:
 else:
   st.markdown(
       """
-      <div style="text-align: center; padding: 60px; background-color: #0f172a; border-radius: 12px; border: 2px dashed #334155; margin-top: 40px;">
-          <h3 style="color: #00f2fe; border: none; margin-bottom: 15px;">CHƯA CÓ DỮ LIỆU ĐƯỢC TẢI LÊN</h3>
-          <p style="font-size: 16px; color: #94a3b8;">Vui lòng tải tệp tin <b>Online_Retail.csv</b> ở thanh bên trái để khởi chạy hệ thống phân tích doanh thu.</p>
+      <div style="text-align: center; padding: 60px; background-color: #090d16; border-radius: 8px; border: 1px solid #1e293b; margin-top: 40px;">
+          <h3 style="color: #00f2fe; border: none; margin-bottom: 12px;">CHƯA CÓ DỮ LIỆU ĐƯỢC TẢI LÊN</h3>
+          <p style="font-size: 14px; color: #94a3b8;">Vui lòng tải tệp tin <b>Online_Retail.csv</b> ở thanh cấu hình bên trái để khởi chạy hệ thống phân tích.</p>
       </div>
       """,
       unsafe_allow_html=True,
